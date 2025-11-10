@@ -1,0 +1,8 @@
+source leaprc.protein.ff19SB
+source leaprc.gaff2
+LIG = loadmol2 drv.mol2
+check LIG 
+loadamberparams drv.frcmod
+saveoff LIG drv.lib 
+saveamberparm LIG drv.prmtop drv.inpcrd
+quit 
