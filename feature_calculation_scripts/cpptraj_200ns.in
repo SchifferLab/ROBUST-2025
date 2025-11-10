@@ -1,0 +1,15 @@
+parm comp.prmtop
+trajin 11md.mdcrd 1 10000
+
+autoimage 
+align first :24-26,86-88,123-125,185-187@CA 
+
+rms first @CA out rmsd_200ns.txt
+
+atomicfluct :1-198@CA byres out rmsf_200ns.txt
+atomicfluct :199&!@H= out rmsf-lig_200ns.txt
+atomicfluct :199 byres out rmsf-lig-whole_200ns.txt
+
+trajout 11md_200ns.dcd dcd #nobox
+run
+quit
