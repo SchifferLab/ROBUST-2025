@@ -1,0 +1,62 @@
+#!/bin/sh
+
+#SBATCH --job-name=amber_sim
+#SBATCH --account=xxx-gpu
+#SBATCH --partition=gpu
+#SBATCH --nodes=1
+#SBATCH --ntasks=32
+#SBATCH --gpus-per-node=1
+#SBATCH --time=48:00:00
+#SBATCH -o amber.o%J.%N 
+#SBATCH -e amber.e%J.%N
+
+module --force purge
+module load modtree/gpu
+module purge
+module load gcc/8.4.1  openmpi/4.0.6-cu11.0.3
+module load amber/20
+module list
+
+echo "starting 1min at '$(date +%H:%M:%S)'"
+sander -O -i 1min.in -o 1min.out -p comp.prmtop -c comp.inpcrd -r 1min.rst7 -inf 1min.info -ref comp.inpcrd -x 1min.mdcrd
+echo "ending 1min at '$(date +%H:%M:%S)'"
+
+echo "starting 2mdheat at '$(date +%H:%M:%S)'"
+pmemd.cuda -O -i 2mdheat.in -o 2mdheat.out -p comp.prmtop -c 1min.rst7 -r 2mdheat.rst7 -inf 2mdheat.info -ref 1min.rst7 -x 2mdheat.mdcrd
+echo "ending 2mdheat at '$(date +%H:%M:%S)'"
+
+echo "starting 3md at '$(date +%H:%M:%S)'"
+pmemd.cuda -O -i 3md.in -o 3md.out -p comp.prmtop -c 2mdheat.rst7 -r 3md.rst7 -inf 3md.info -ref 2mdheat.rst7 -x 3md.mdcrd
+echo "ending 3md at '$(date +%H:%M:%S)'"
+
+echo "starting 4md at '$(date +%H:%M:%S)'"
+pmemd.cuda -O -i 4md.in -o 4md.out -p comp.prmtop -c 3md.rst7 -r 4md.rst7 -inf 4md.info -ref 3md.rst7 -x 4md.mdcrd
+echo "ending 4md at '$(date +%H:%M:%S)'"
+
+echo "starting 5min at '$(date +%H:%M:%S)'"
+pmemd -O -i 5min.in -o 5min.out -p comp.prmtop -c 4md.rst7 -r 5min.rst7 -inf 5min.info -ref 4md.rst7 -x 5min.mdcrd
+echo "ending 5min at '$(date +%H:%M:%S)'"
+
+echo "starting 6md at '$(date +%H:%M:%S)'"
+pmemd.cuda -O -i 6md.in -o 6md.out -p comp.prmtop -c 5min.rst7 -r 6md.rst7 -inf 6md.info -ref 5min.rst7 -x 6md.mdcrd
+echo "ending 6md at '$(date +%H:%M:%S)'"
+
+echo "starting 7md at '$(date +%H:%M:%S)'"
+pmemd.cuda -O -i 7md.in -o 7md.out -p comp.prmtop -c 6md.rst7 -r 7md.rst7 -inf 7md.info -ref 6md.rst7 -x 7md.mdcrd
+echo "ending 7md at '$(date +%H:%M:%S)'"
+
+echo "starting 8md at '$(date +%H:%M:%S)'"
+pmemd.cuda -O -i 8md.in -o 8md.out -p comp.prmtop -c 7md.rst7 -r 8md.rst7 -inf 8md.info -ref 7md.rst7 -x 8md.mdcrd
+echo "ending 8md at '$(date +%H:%M:%S)'"
+
+echo "starting 9md at '$(date +%H:%M:%S)'"
+pmemd.cuda -O -i 9md.in -o 9md.out -p comp.prmtop -c 8md.rst7 -r 9md.rst7 -inf 9md.info -ref 8md.rst7 -x 9md.mdcrd
+echo "ending 9md at '$(date +%H:%M:%S)'"
+
+echo "starting 10md at '$(date +%H:%M:%S)'"
+pmemd.cuda -O -i 10md.in -o 10md.out -p comp.prmtop -c 9md.rst7 -r 10md.rst7 -inf 10md.info -x 10md.mdcrd 
+echo "ending 10md at '$(date +%H:%M:%S)'"
+
+echo "starting 11md at '$(date +%H:%M:%S)'"
+pmemd.cuda -O -i 11md.in -o 11md.out -p comp.prmtop -c 10md.rst7 -r 11md.rst7 -inf 11md.info -x 11md.mdcrd
+echo "finished 11md at '$(date +%H:%M:%S)'"
